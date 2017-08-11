@@ -1,28 +1,57 @@
-module.exports = function(req, res, next) {
-    var token;
-    //Check if authorization header is present
-    if (req.headers && req.headers.authorization) {
-        //authorization header is present
-        var parts = req.headers.authorization.split(' ');
-        if (parts.length == 2) {
-            var scheme = parts[0];
-            var credentials = parts[1];
+/**
+ * Policy Mappings
+ * (sails.config.policies)
+ *
+ * Policies are simple functions which run **before** your controllers.
+ * You can apply one or more policies to a given controller, or protect
+ * its actions individually.
+ *
+ * Any policy file (e.g. `api/policies/authenticated.js`) can be accessed
+ * below by its filename, minus the extension, (e.g. "authenticated")
+ *
+ * For more information on how policies work, see:
+ * http://sailsjs.org/#!/documentation/concepts/Policies
+ *
+ * For more information on configuring policies, check out:
+ * http://sailsjs.org/#!/documentation/reference/sails.config/sails.config.policies.html
+ */
 
-            if (/^Bearer$/i.test(scheme)) {
-                token = credentials;
-            }
-        } else {
-            return res.json(401, { err: 'Format is Authorization: Bearer [token]' });
-        }
-    } else {
-        //authorization header is not present
-        return res.json(401, { err: 'No Authorization header was found' });
+
+module.exports.policies = {
+
+    /***************************************************************************
+     *                                                                          *
+     * Default policy for all controllers and actions (`true` allows public     *
+     * access)                                                                  *
+     *                                                                          *
+     ***************************************************************************/
+
+    // '*': true,
+
+    /***************************************************************************
+     *                                                                          *
+     * Here's an example of mapping some policies to run before a controller    *
+     * and its actions                                                          *
+     *                                                                          *
+     ***************************************************************************/
+    // RabbitController: {
+
+    // Apply the `false` policy as the default for all of RabbitController's actions
+    // (`false` prevents all access, which ensures that nothing bad happens to our rabbits)
+    // '*': false,
+
+    // For the action `nurture`, apply the 'isRabbitMother' policy
+    // (this overrides `false` above)
+    // nurture	: 'isRabbitMother',
+
+    // Apply the `isNiceToAnimals` AND `hasRabbitFood` policies
+    // before letting any users feed our rabbits
+    // feed : ['isNiceToAnimals', 'hasRabbitFood']
+    // }
+
+    '*': ['isAuthorized'], // Everything resctricted here
+    'UserController': {
+        'signup': true, // We dont need authorization here, allowing public access
+        'login': true // We dont need authorization here, allowing public access
     }
-    jwToken.verify(token, function(err, decoded) {
-        if (err) {
-            return res.json(401, { err: 'Invalid token' });
-        }
-        req.user = decoded;
-        next();
-    });
 };

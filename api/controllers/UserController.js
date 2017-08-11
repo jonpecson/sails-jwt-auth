@@ -20,6 +20,29 @@ module.exports = {
             return res.json(user);
         });
     },
+
+    'login': function(req, res) {
+        //Compare the password
+        bcrypt.compare(req.body.password, user.encryptedPassword, function(err, result) {
+            if (result) {
+                //password is a match
+                return res.json({
+                    user: user,
+                    token: jwToken.sign(user) //generate the token and send it in the response
+                });
+            } else {
+                //password is not a match
+                return res.forbidden({ err: 'Email and password combination do not match' });
+            }
+        });
+
+    },
+
+    'check': function(req, res) {
+        return res.json();
+    },
+
+
     // 'login': function(req, res) {
     //     //Return error if email or password are not passed
     //     if (!req.body.email || !req.body.password) {
@@ -50,25 +73,5 @@ module.exports = {
     //     });
     // }
 
-    'login': function(req, res) {
-        //Compare the password
-        bcrypt.compare(req.body.password, user.encryptedPassword, function(err, result) {
-            if (result) {
-                //password is a match
-                return res.json({
-                    user: user,
-                    token: jwToken.sign(user) //generate the token and send it in the response
-                });
-            } else {
-                //password is not a match
-                return res.forbidden({ err: 'Email and password combination do not match' });
-            }
-        });
-
-    },
-
-    'check': function(req, res) {
-        return res.json();
-    },
 
 };
